@@ -2,11 +2,9 @@
 import { useForm } from 'vee-validate'
 import { ref } from 'vue'
 import { object, string } from 'yup'
-import { useToast } from 'vue-toastification'
 
 const config = useRuntimeConfig()
 const apiDemoUrl = config.public.API_SHOCK_URL
-const toast = useToast()
 
 useHead({
   title: 'other',
@@ -14,10 +12,13 @@ useHead({
 
 definePageMeta({
   layout: 'admin',
-  middleware: 'auth',
 })
 const transferNow = 'TRANSFER_NOW'
 const transferAuto = 'TRANSFER_AUTO'
+
+const messageKey = {
+  required: 'กรุณากรอกข้อมูล',
+}
 
 const formData = ref({
   // fromBank: '',
@@ -28,8 +29,6 @@ const formData = ref({
   // totalTransferAutoMin: '',
   transferAuto: transferNow,
 })
-const isOpen = ref(false)
-const isLoading = ref(false)
 
 const bankList = [
   { bankCode: 'KBANK', bankName: 'ธนาคารกสิกรไทย' },
@@ -94,39 +93,15 @@ const backAccount: Ref<{
   banksAuto: [],
 })
 
-const history: Ref<{
-  historyList: {
-    _id: string
-    success: boolean
-    withdrawType: string
-    isAuto: boolean
-    prefix: string
-    individual: string
-    banking: {
-      _bsontype: string
-      id: {
-        type: string
-        data: number[]
-      }
-    }
-    total: number
-    toBank: string
-    toAccount: string
-    fromBank: string
-    fromAccount: string
-    customerName: string
-    status: string
-    createdAt: Date
-    updatedAt: Date
-    __v: number
-  }[]
-}> = ref({
-  historyList: [],
-})
+// const emit = defineEmits({
+//   submit(payload) {
+//     getTransferBank();
+//   },
+// })
 
 async function getTransferBank() {
   const res = await $fetch(
-    `https://${localStorage.getItem('prefix')}-backend-api.iautobet.com/api/customers/manuals/transfer-bank`,
+    `https://${localStorage.getItem('prefix')}-backend-api.iautobet.com/api/customers/manuals/transfer-bank/history`,
     {
       method: 'get',
       headers: {
@@ -162,6 +137,18 @@ interface OtherForm {
 
 const { handleSubmit, setFieldValue, setErrors } = useForm<OtherForm>({
 
+  // initialValues: {
+  //   transferAuto: transferNow,
+  // },
+  // initialTouched: {
+  //   fromBank: true,
+  //   accountNo: true,
+  //   bankName: true,
+  //   pin: true,
+  //   total: true,
+  //   totalTransferAutoMin: true,
+  //   transferAuto: true,
+  // },
   validationSchema: object({
     fromBank: string().required('funds_other_valid_account_from').label('fromBank'),
     accountNo: string().required('funds_other_valid_account_to').label('accountNo'),
@@ -201,52 +188,27 @@ const onSubmit = handleSubmit(async (values) => {
       }
     }
 
-    if (!isOpen.value) {
-      isOpen.value = true
-      return
-    }
-    isLoading.value = true
-
+    // console.error(values)
     const res = await $fetch(
       `https://${localStorage.getItem('prefix')}-backend-api.iautobet.com/api/customers/manuals/transfer-bank/`,
       {
         method: 'post',
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem('sessionToken')}`,
-        },
         body: {
           fromBank: values.fromBank || '',
           accountNo: values.accountNo || '',
           bankName: values.bankName || '',
           pin: values.pin || '',
           total: values.total || '',
-          totalTransferAutoMin: values.totalTransferAutoMin || 0,
+          totalTransferAutoMin: values.totalTransferAutoMin || '',
           transferAuto: formData.value.transferAuto || transferNow,
         },
       },
     ).catch((error) => {
-      const resError = error?.response?._data
-      if (resError?.statusCode == 400) {
-        if (resError?.message == 'รหัสพิน ไม่ถูกต้อง!!')
-          toast.error('incorrect PIN')
-
-        else
-          toast.error(error?.message || 'Invalid data')
-      }
-      else {
-        toast.error(error?.message || 'Invalid data')
-      }
-    }).finally(() => {
-      isOpen.value = false
-      isLoading.value = false
+      // alert(error)
     })
 
-    if (res) {
-      toast.success('Complete!')
-      reload()
-      if (transferAuto === formData.value.transferAuto)
-        getTransferBank()
-    }
+    if (res)
+      alert('ทำรายการสำเร็จ')
   }
 
   catch (e: any) {
@@ -254,44 +216,11 @@ const onSubmit = handleSubmit(async (values) => {
   }
 })
 
-async function getHistory() {
-  isLoading.value = true
-  const res = await $fetch(
-    `https://${localStorage.getItem('prefix')}-backend-api.iautobet.com/api/customers/manuals/transfer-bank/history`,
-
-    {
-      method: 'get',
-      headers: {
-        Authorization: `Bearer ${localStorage.getItem('sessionToken')}`,
-      },
-    },
-  )
-    .catch((error) => {
-      // alert(error)
-    })
-    .finally(() => {
-      isLoading.value = false
-    })
-
-  if (res) {
-    // console.error(res)
-    history.value.historyList = []
-    res.forEach((data) => {
-      history.value.historyList.push(data)
-    })
-  }
-}
-
 onMounted(async () => {
   // setInterval(() => {
   getTransferBank()
-  getHistory()
   // }, 5000)
 })
-
-function reload() {
-  getHistory()
-}
 </script>
 
 <template>
@@ -308,7 +237,7 @@ function reload() {
             <div class="px-4 py-5 grid grid-cols-6 gap-6">
               <div class="col-span-6">
                 <div class="col-span-6 sm:col-span-3">
-                  <Dropdown v-model="formData.fromBank" :label="$t('funds_other_from_account')" name="fromBank">
+                  <Dropdown v-model="formData.fromBank" :label="$t('funds_other_from')" name="fromBank">
                     <option v-for="item in backAccount.bankAccountList" :key="item.id" v-bind="item" :value="item.id">
                       {{ $t('funds_other_txt_bank') }} {{ item.bank_account_name }} {{ $t('funds_other_account_no') }}
                       {{ item.bank_account_number }}
@@ -318,8 +247,7 @@ function reload() {
               </div>
 
               <div class="col-span-6">
-                <label for="accountNo" class="block text-sm font-medium text-gray-700">{{ $t('funds_other_to_account')
-                }}</label>
+                <label for="accountNo" class="block text-sm font-medium text-gray-700">{{ $t('funds_other_to') }}</label>
                 <VInput
                   id="accountNo" v-model="formData.accountNo" type="text" name="accountNo" autocomplete="accountNo"
                   class="
@@ -332,13 +260,19 @@ function reload() {
                     sm:text-sm
                     border-gray-300
                     rounded-md
-                  " :placeholder="$t('funds_other_to_account_placeholder')"
+                  " :placeholder="$t('funds_other_to_placeholder')"
                 />
               </div>
 
               <div class="col-span-6">
+                <!-- <Dropdown title="ธนาคารปลายทาง" name="bankName" form="formData.bankName">
+                  <option v-for="item in bankList" :key="item.key" v-bind="item" :value="item.bankCode">
+                    {{ item.bankName }}
+                  </option>
+                </Dropdown> -->
+
                 <div class="col-span-6 sm:col-span-3">
-                  <Dropdown v-model="formData.bankName" :label="$t('funds_other_to_account_bank')" name="bankName">
+                  <Dropdown v-model="formData.bankName" :label="$t('funds_other_to_bank')" name="bankName">
                     <option v-for="item in bankList" :key="item.bankCode" v-bind="item" :value="item.bankCode">
                       {{ $t(`bank_code_${toLower(item.bankCode)}`) }}
                     </option>
@@ -362,7 +296,8 @@ function reload() {
                     sm:text-sm
                     border-gray-300
                     rounded-md
-                  " min="1" :placeholder="$t('funds_other_funds_transfer_automatic_placeholder')"
+                  " min="1"
+                  :placeholder="$t('funds_other_funds_transfer_automatic_placeholder')"
                 />
               </div>
 
@@ -435,6 +370,9 @@ function reload() {
                 </div>
 
                 <div v-if="transferAuto === formData.transferAuto">
+                  <!-- <legend class="text-base font-medium text-gray-900">
+                    Push Notifications
+                  </legend> -->
                   <div class="text-sm bg-rose-300 rounded-md p-3">
                     <Icon name="line-md:alert" class="w-6 h-6" />
                     <strong>{{ $t('funds_other_funds_transfer_add_automatic_warning') }}</strong>
@@ -452,178 +390,8 @@ function reload() {
       </VCard>
     </VCard>
 
-    <ManualFundtransferOtherAutoList :banks-auto="backAccount.banksAuto" @reloadBank="getTransferBank" />
-    <ManualFundtransferOtherHistoryList :history="history" :isLoading:="isLoading" @reload="reload" />
+    <ManualFundtransferOtherAutoList :banks-auto="backAccount.banksAuto" />
+    <ManualFundtransferOtherHistoryList />
   </div>
   <!-- card -->
-
-  <!-- Confirm modal -->
-  <VModal v-model="isOpen">
-    <VModalHeader dismissable>
-      <strong class="text-center">{{ $t('funds_other_modal_header') }}</strong>
-    </VModalHeader>
-    <VModalBody>
-      <form>
-        <div class="overflow-hidden sm:rounded-md">
-          <div class="px-4 py-5 grid grid-cols-6 gap-6">
-            <div class="col-span-6">
-              <div class="col-span-6 sm:col-span-3">
-                <Dropdown
-                  v-model="formData.fromBank" :label="$t('funds_other_from_account')" name="fromBank"
-                  :disabled="true"
-                >
-                  <option v-for="item in backAccount.bankAccountList" :key="item.id" v-bind="item" :value="item.id">
-                    {{ $t('funds_other_txt_bank') }} {{ item.bank_account_name }} {{ $t('funds_other_account_no') }}
-                    {{ item.bank_account_number }}
-                  </option>
-                </Dropdown>
-              </div>
-            </div>
-
-            <div class="col-span-6">
-              <label for="accountNo" class="block text-sm font-medium text-gray-700">{{ $t('funds_other_to_account')
-              }}</label>
-              <VInput
-                id="accountNo" v-model="formData.accountNo" type="text" name="accountNo" autocomplete="accountNo"
-                class="
-                    mt-1
-                    focus:ring-indigo-500
-                    focus:border-indigo-500
-                    block
-                    w-full
-                    shadow-sm
-                    sm:text-sm
-                    border-gray-300
-                    rounded-md
-                  " :placeholder="$t('funds_other_to_account_placeholder')" :disabled="true"
-              />
-            </div>
-
-            <div class="col-span-6">
-              <div class="col-span-6 sm:col-span-3">
-                <Dropdown
-                  v-model="formData.bankName" :label="$t('funds_other_to_account_bank')" name="bankName"
-                  :disabled="true"
-                >
-                  <option v-for="item in bankList" :key="item.bankCode" v-bind="item" :value="item.bankCode">
-                    {{ $t(`bank_code_${toLower(item.bankCode)}`) }}
-                  </option>
-                </Dropdown>
-              </div>
-            </div>
-
-            <div v-if="transferAuto === formData.transferAuto" class="col-span-6">
-              <label for="totalTransferAutoMin" class="block text-sm font-medium text-gray-700"> {{
-                $t('funds_other_funds_transfer_automatic') }}
-              </label>
-              <VInput
-                id="totalTransferAutoMin" v-model="formData.totalTransferAutoMin" type="number"
-                name="totalTransferAutoMin" autocomplete="totalTransferAutoMin" class="
-                    mt-1
-                    focus:ring-indigo-500
-                    focus:border-indigo-500
-                    block
-                    w-full
-                    shadow-sm
-                    sm:text-sm
-                    border-gray-300
-                    rounded-md
-                  " min="1" :placeholder="$t('funds_other_funds_transfer_automatic_placeholder')" :disabled="true"
-              />
-            </div>
-
-            <div class="col-span-6">
-              <label for="total" class="block text-sm font-medium text-gray-700">{{ $t('funds_other_amount') }}</label>
-              <VInput
-                id="total" v-model="formData.total" type="number" name="total" autocomplete="total" class="
-                    mt-1
-                    focus:ring-indigo-500
-                    focus:border-indigo-500
-                    block
-                    w-full
-                    shadow-sm
-                    sm:text-sm
-                    border-gray-300
-                    rounded-md
-                  " :disabled="true"
-              />
-            </div>
-
-            <div class="col-span-6">
-              <label for="pin" class="block text-sm font-medium text-gray-700">{{ $t('funds_other_pin_for_transfer')
-              }}</label>
-              <VInput
-                id="pin" v-model="formData.pin" type="text" name="pin" class="
-                    mt-1
-                    focus:ring-indigo-500
-                    focus:border-indigo-500
-                    block
-                    w-full
-                    shadow-sm
-                    sm:text-sm
-                    border-gray-300
-                    rounded-md
-                  " :disabled="true"
-              />
-            </div>
-
-            <fieldset class="col-span-6">
-              <div class="flex flex-row m-4">
-                <div class="flex items-center mr-2">
-                  <input
-                    id="transferNow" v-model="formData.transferAuto" name="transferAuto" type="radio" class="
-                        focus:ring-indigo-500
-                        h-4
-                        w-4
-                        text-indigo-600
-                        border-gray-300
-                      " :value="transferNow" checked disabled="true"
-                  >
-                  <label class="ml-3 block text-sm font-medium text-gray-700">
-                    {{ $t('funds_other_funds_transfer_immediately') }}
-                  </label>
-                </div>
-
-                <div class="flex items-center">
-                  <input
-                    id="auto" v-model="formData.transferAuto" name="transferAuto" type="radio" class="
-                        focus:ring-indigo-500
-                        h-4
-                        w-4
-                        text-indigo-600
-                        border-gray-300
-                      " value="TRANSFER_AUTO" disabled="true"
-                  >
-                  <label class="ml-3 block text-sm font-medium text-gray-700">
-                    {{ $t('funds_other_funds_transfer_add_automatic') }}
-                  </label>
-                </div>
-              </div>
-
-              <div v-if="transferAuto === formData.transferAuto">
-                <div class="text-sm bg-rose-300 rounded-md p-3">
-                  <Icon name="line-md:alert" class="w-6 h-6" />
-                  <strong>{{ $t('funds_other_funds_transfer_add_automatic_warning') }}</strong>
-                </div>
-              </div>
-            </fieldset>
-          </div>
-        </div>
-      </form>
-    </VModalBody>
-    <VModalFooter>
-      <div class="flex justify-between">
-        <VButton color="success" shadow="md" @click="!isLoading ? onSubmit() : ''">
-          <Icon v-if="isLoading" name="svg-spinners:tadpole" class="w-5 h-5" />
-          {{ $t('funds_other_modal_button_confirm') }}
-        </VButton>
-
-        <VButton color="error" variant="tertiary" shadow="md" @click="isOpen = false">
-          <Icon v-if="isLoading" name="svg-spinners:tadpole" class="w-5 h-5" />
-          {{ $t('funds_other_modal_button_cancel') }}
-        </VButton>
-      </div>
-    </VModalFooter>
-  </VModal>
-  <!-- Confirm modal -->
 </template>

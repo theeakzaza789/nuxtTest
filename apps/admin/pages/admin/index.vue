@@ -12,10 +12,7 @@ const stats: Ref<{
   accountList: [],
 })
 
-const isLoading: Ref<boolean> = ref(false)
-
 onMounted(async () => {
-  isLoading.value = true
   const res = await $fetch(
     `https://${localStorage.getItem('prefix')}-backend-api.iautobet.com/api/dashboard/bankings `,
     {
@@ -26,13 +23,12 @@ onMounted(async () => {
     },
   ).catch((error) => {
     // alert(error)
-  }).finally(() => {
-    isLoading.value = false
   })
+
   if (res) {
     // console.error(res)
     stats.value.accountList = []
-    res?.forEach((data) => {
+    res.forEach((data) => {
       stats.value.accountList.push({
         accountNo: data.bank_account_number,
         currentBalance: data.currentBalance,
@@ -65,10 +61,6 @@ onMounted(async () => {
     <!-- stats -->
     <div v-if="stats.accountList.length !== 0" class="grid grid-cols-2 sm:grid-cols-4 mb-5 gap-5">
       <AdminMetricItem v-for="stat in stats.accountList" :key="stat" v-bind="stat" />
-    </div>
-
-    <div v-if="isLoading" class="grid grid-cols-2 sm:grid-cols-4 mb-5 gap-5">
-      <AdminMetricItemSkeletion :total-card="4" />
     </div>
   </div>
 </template>

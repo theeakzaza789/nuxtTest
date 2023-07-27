@@ -1,6 +1,5 @@
 <script lang="ts" setup>
 import dayjs from 'dayjs'
-import { useToast } from 'vue-toastification'
 
 defineProps<{
   banksAuto: {
@@ -25,8 +24,7 @@ defineProps<{
   }
 }>()
 
-const emit = defineEmits(['reloadBank'])
-const toast = useToast()
+const emit = defineEmits(['inFocus', 'submit'])
 
 const isLoading = ref(false)
 
@@ -46,15 +44,15 @@ async function cancelTransferAuto(id: string) {
     },
   )
     .catch((error) => {
-      toast.error('Invalid data')
+      alert(error)
     })
     .finally(() => {
       isLoading.value = false
     })
 
   if (res) {
-    toast.success('Complete!')
-    emit('reloadBank')
+    alert('ทำรายการสำเร็จ')
+    emit('submit')
   }
 }
 </script>
@@ -84,10 +82,10 @@ async function cancelTransferAuto(id: string) {
                 {{ $t('funds_other_latest_amount_transfer') }}
               </th>
               <th scope="col" class="px-6 py-3">
-                {{ $t('funds_other_latest_from_account') }}
+                {{ $t('funds_other_latest_from') }}
               </th>
               <th scope="col" class="px-6 py-3">
-                {{ $t('funds_other_latest_to_account') }}
+                {{ $t('funds_other_latest_to') }}
               </th>
               <th scope="col" class="px-6 py-3">
                 {{ $t('funds_other_latest_provider') }}
