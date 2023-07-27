@@ -39,8 +39,8 @@ const menus = ref([
     icon: 'bx:transfer-alt',
     children: [
       {
-        text: 'menu_child_fundstransfer_other_account',
-        to: '/manual/fundtransfer-other',
+        text: 'menu_child_funds_transfer_other_account',
+        to: '/manual/funds-transfer-other',
       },
     ],
   },

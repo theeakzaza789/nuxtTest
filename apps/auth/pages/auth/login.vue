@@ -5,7 +5,7 @@ import { useToast } from 'vue-toastification'
 import { useAuthStore } from '~~/stores/auth'
 
 const config = useRuntimeConfig()
-const apiDemoUrl = config.public.API_SHOCK_URL
+const apiUrl = config.public.API_URL_3001
 const localePath = useLocalePath()
 const { locale, setLocale, t } = useI18n()
 
@@ -17,7 +17,7 @@ useHead({
 })
 
 definePageMeta({
-  layout: 'auth',
+  layout: 'admin',
   middleware: 'guest',
 })
 
@@ -25,8 +25,8 @@ const { handleSubmit } = useForm({
   validationSchema: object({
     username: string().required().label('Username'),
     password: string().required().label('Password'),
-    prefix: string().required().label('Prefix'),
-    twofactor: string().optional().label('Twofactor'),
+    // prefix: string().required().label('Prefix'),
+    // twofactor: string().optional().label('Twofactor'),
   }),
 })
 
@@ -42,16 +42,16 @@ const onSubmit = handleSubmit(async (values) => {
   // console.error(values)
   try {
     const res = await $fetch(
-      `https://${values.prefix.trim()}-backend-api.iautobet.com/api/customers/login`,
+      `${apiUrl}/auth/login`,
       {
-        method: 'post',
+        method: 'POST',
         body: {
           username: values.username || '',
           password: values.password || '',
-          prefix: values.prefix || '',
-          twofactor: values.twofactor || '',
-          captcha:
-            'xxx',
+          // prefix: values.prefix || '',
+          // twofactor: values.twofactor || '',
+          // captcha:
+          //   'xxx',
         },
       },
     ).catch((error) => {
@@ -81,22 +81,25 @@ const onSubmit = handleSubmit(async (values) => {
 </script>
 
 <template>
-  <div class="flex items-center justify-center h-full">
-    <form class="rounded-lg px-10 py-8 w-full max-w-md mx-auto" @submit="onSubmit">
-      <AuthHeader :title="$t('login')" />
+  <div class="h-screen flex items-center justify-center w-full">
+    <div class="lg:w-[400px]">
+      <div class="bg-white rounded-xl shadow-lg">
+        <div class="flex items-center justify-center h-full">
+          <form class="rounded-lg px-10 py-8 w-full max-w-md mx-auto" @submit="onSubmit">
+            <AuthHeader :title="$t('login')" />
 
-      <div v-if="error" class="bg-error-600 text-white text-sm px-4 py-3 rounded-lg mb-4">
-        {{ error }}
-      </div>
+            <div v-if="error" class="bg-error-600 text-white text-sm px-4 py-3 rounded-lg mb-4">
+              {{ error }}
+            </div>
 
-      <VInput name="username" label="Username" placeholder="Username" />
-      <VInput name="password" label="Password" placeholder="Password" type="password" />
-      <VInput name="prefix" label="Prefix" placeholder="Prefix" />
-      <VInput name="twofactor" placeholder="Twofactor" />
-      <div class="mb-5 flex gap-2 justify-between items-center">
-        <label class="flex gap-2 items-center text-sm">
-          <input
-            type="checkbox" class="
+            <VInput name="username" label="Username" placeholder="Username" />
+            <VInput name="password" label="Password" placeholder="Password" type="password" />
+            <!-- <VInput name="prefix" label="Prefix" placeholder="Prefix" />
+            <VInput name="twofactor" placeholder="Twofactor" /> -->
+            <div class="mb-5 flex gap-2 justify-between items-center">
+              <label class="flex gap-2 items-center text-sm">
+                <input
+                  type="checkbox" class="
               w-4
               h-4
               rounded
@@ -105,25 +108,25 @@ const onSubmit = handleSubmit(async (values) => {
               transition
               duration-300
             "
-          >
-          {{ $t('remember_me') }}
-        </label>
-        <nuxt-link to="/auth/forgot-password" class="text-primary-500 hover:underline font-semibold text-sm">
-          {{ $t('forgot_password') }}
-        </nuxt-link>
-      </div>
+                >
+                {{ $t('remember_me') }}
+              </label>
+              <nuxt-link to="/auth/forgot-password" class="text-primary-500 hover:underline font-semibold text-sm">
+                {{ $t('forgot_password') }}
+              </nuxt-link>
+            </div>
 
-      <VButton type="submit" color="primary" block class="mb-5">
-        {{ $t('login') }}
-      </VButton>
+            <VButton type="submit" color="primary" block class="mb-5">
+              {{ $t('login') }}
+            </VButton>
 
-      <!-- <button
+            <!-- <button
         class="px-3 py-2.5 rounded-md mb-4 font-semibold inline-flex w-full items-center justify-center bg-primary-500 text-white border-primary-500 focus:ring focus:ring-primary-500 focus:ring-offset-1 transition duration-300 hover:bg-primary-600 hover:border-primary-600"
       >
         Login
       </button> -->
 
-      <!-- <div class="text-gray-600 text-sm">
+            <!-- <div class="text-gray-600 text-sm">
         Don't have account?
         <nuxt-link
           to="/auth/register"
@@ -132,6 +135,10 @@ const onSubmit = handleSubmit(async (values) => {
           Register
         </nuxt-link>
       </div> -->
-    </form>
+          </form>
+        </div>
+      </div>
+    </div>
   </div>
+  v.1.0.5
 </template>

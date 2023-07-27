@@ -6,7 +6,7 @@ defineEmits(['menu:click'])
 const auth = useAuthStore()
 const router = useRouter()
 
-const logout = () => {
+function logout() {
   auth.logout()
   router.push('/auth/login')
 }
@@ -64,7 +64,7 @@ const logout = () => {
               class="flex items-center gap-2"
             >
               <Icon name="ri:user-line" class="w-5 h-5" />
-              <span class="hidden sm:inline"> {{ auth.user?.name }} </span>
+              <span class="hidden sm:inline"> {{ auth.user }} </span>
               <Icon
                 name="ri:arrow-down-s-line"
                 class="i-ri-arrow-down-s-line w-5 h-5"

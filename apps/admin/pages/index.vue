@@ -1,6 +1,6 @@
 <script lang="ts" setup>
 definePageMeta({
-  layout: '',
+  layout: 'admin',
   middleware: 'auth',
 })
 
@@ -12,5 +12,5 @@ onMounted(async () => {
 </script>
 
 <template>
-  <div>blank</div>
+  <div />
 </template>

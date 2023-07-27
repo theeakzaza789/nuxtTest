@@ -9,11 +9,15 @@ const props = withDefaults(
     placeholder?: string
     type?: string
     size?: 'sm' | 'md' | 'lg'
+    disabled: boolean
+
   }>(),
   {
     name: '',
     type: 'text',
     size: 'sm',
+    disabled: false,
+
   },
 )
 const { name, rules } = toRefs(props)
@@ -51,12 +55,14 @@ const errorClass = 'border-error-500 focus:ring-error-500 focus:border-error-500
         shadow-sm
         focus:outline-none
         sm:text-sm
+        disabled:opacity-75
       " :class="[
         sizeClass.input[size],
         errorMessage
           ? errorClass
           : 'border-gray-300 focus:ring-primary-500 focus:border-primary-500',
     ]"
+      :disabled="disabled"
     >
       <slot />
       <!-- <option v-for="item in optionList" :key="item.key" v-bind="item" >{{ item.message }}</option> -->

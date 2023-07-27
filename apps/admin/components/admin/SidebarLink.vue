@@ -12,7 +12,7 @@ const props
 
 <template>
   <NuxtLink
-    class="
+    exact exact-active-class="bg-indigo-500 text-white" class="
       px-4
       py-2
       transition

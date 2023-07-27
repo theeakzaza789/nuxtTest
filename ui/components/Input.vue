@@ -9,11 +9,13 @@ const props = withDefaults(
     placeholder?: string
     type?: string
     size?: 'sm' | 'md' | 'lg'
+    disabled: boolean
   }>(),
   {
     name: '',
     type: 'text',
     size: 'sm',
+    disabled: false,
   },
 )
 
@@ -43,17 +45,13 @@ const errorClass = 'border-error-500 focus:ring-error-500 focus:border-error-500
       {{ label }}
     </label>
     <input
-      :id="name"
-      v-model="value"
-      :type="type"
-      :placeholder="placeholder"
-      class="rounded-md w-full focus:ring-1 transition duration-300"
-      :class="[
+      :id="name" v-model="value" :type="type" :placeholder="placeholder"
+      class="rounded-md w-full focus:ring-1 transition duration-300 disabled:opacity-75" :class="[
         sizeClass.input[size],
         errorMessage
           ? errorClass
           : 'border-gray-300 focus:ring-primary-500 focus:border-primary-500',
-      ]"
+      ]" :disabled="disabled"
     >
     <div v-if="errorMessage" class="text-error-500 text-sm mt-1">
       {{ $t(errorMessage) }}
