@@ -42,7 +42,7 @@ const onSubmit = handleSubmit(async (values) => {
   // console.error(values)
   try {
     const res = await $fetch(
-      `${apiUrl}`,
+      `http://192.53.112.192:3001/auth/login`,
       {
         method: 'POST',
         body: {
@@ -142,5 +142,5 @@ const onSubmit = handleSubmit(async (values) => {
       </div>
     </div>
   </div>
-  v.1.0.6
+  v.1.0.7
 </template>
