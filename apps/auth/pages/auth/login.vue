@@ -142,5 +142,5 @@ const onSubmit = handleSubmit(async (values) => {
       </div>
     </div>
   </div>
-  v.1.0.5
+  v.1.0.6
 </template>
