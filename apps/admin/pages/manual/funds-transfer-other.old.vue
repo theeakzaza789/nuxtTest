@@ -5,7 +5,7 @@ import { object, string } from 'yup'
 import { useToast } from 'vue-toastification'
 
 const config = useRuntimeConfig()
-const apiUrl = config.public.API_URL_BANKING_GET_TRANSFER_BY_MEMBER_ID
+const apiDemoUrl = config.public.API_URL_3001
 const toast = useToast()
 
 useHead({
@@ -250,18 +250,20 @@ const onSubmit = handleSubmit(async (values) => {
   }
 
   catch (e: any) {
+    // console.error(e)
   }
 })
 
 async function getHistory() {
   isLoading.value = true
-
   const res = await $fetch(
-    apiUrl,
+    `https://${localStorage.getItem('prefix')}-backend-api.iautobet.com/api/customers/manuals/transfer-bank/history`,
 
     {
       method: 'get',
-      credentials: 'include',
+      headers: {
+        Authorization: `Bearer ${localStorage.getItem('sessionToken')}`,
+      },
     },
   )
     .catch((error) => {
@@ -282,7 +284,7 @@ async function getHistory() {
 
 onMounted(async () => {
   // setInterval(() => {
-  // getTransferBank()
+  getTransferBank()
   getHistory()
   // }, 5000)
 })

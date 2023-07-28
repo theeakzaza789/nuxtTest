@@ -4,6 +4,10 @@ export default defineNuxtConfig({
   //   env: resolve(__dirname, '../env/.env'),
   //   envDev: resolve(__dirname, '../env/.env.dev'),
   // },
+
+  server: {
+    port: 4200, // default: 3000
+  },
   extends: [
     './ui',
     './apps/admin',
@@ -229,8 +233,8 @@ export default defineNuxtConfig({
   runtimeConfig: {
     apiSecret: '', // can be overridden by NUXT_API_SECRET environment variable
     public: {
-      API_URL_3000: process.env.NODE_ENV === 'production' ? process.env.API_URL_3000 : process.env.API_URL_3000,
-      API_URL_3001: process.env.NODE_ENV === 'production' ? process.env.API_URL_3001 : process.env.API_URL_3001,
+      API_URL_AUTH_LOGIN: process.env.NODE_ENV === 'production' ? process.env.API_URL_AUTH_LOGIN : process.env.API_URL_AUTH_LOGIN,
+      API_URL_BANKING_GET_TRANSFER_BY_MEMBER_ID: process.env.API_URL_BANKING_GET_TRANSFER_BY_MEMBER_ID === 'production' ? process.env.API_URL_BANKING_GET_TRANSFER_BY_MEMBER_ID : process.env.API_URL_BANKING_GET_TRANSFER_BY_MEMBER_ID,
       API_KEY: process.env.NODE_ENV === 'production' ? process.env.API_KEY : process.env.API_KEY,
       gaId: 'test',
     },

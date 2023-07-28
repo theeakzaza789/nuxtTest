@@ -5,11 +5,11 @@ import { useToast } from 'vue-toastification'
 import { useAuthStore } from '~~/stores/auth'
 
 const config = useRuntimeConfig()
-const apiUrl = config.public.API_URL_3001
-const localePath = useLocalePath()
-const { locale, setLocale, t } = useI18n()
+const apiUrl = config.public.API_URL_AUTH_LOGIN
+// const localePath = useLocalePath()
+// const { locale, setLocale, t } = useI18n()
 
-console.error(locale.value)
+// console.error(locale.value)
 
 const toast = useToast()
 useHead({
@@ -42,7 +42,7 @@ const onSubmit = handleSubmit(async (values) => {
   // console.error(values)
   try {
     const res = await $fetch(
-      `${apiUrl}/auth/login`,
+      `${apiUrl}`,
       {
         method: 'POST',
         body: {
@@ -55,8 +55,9 @@ const onSubmit = handleSubmit(async (values) => {
         },
       },
     ).catch((error) => {
+      console.error(error)
       if (error)
-        toast.error(error?.message || 'Invalid data')
+        toast.error(error?.data?.message || 'Invalid data')
 
       else
         toast.error('Invalid data')
@@ -64,13 +65,14 @@ const onSubmit = handleSubmit(async (values) => {
 
     if (res) {
       alert('Login Success')
-      const token = res.access_token
-      const user = res.name
-      store(token, user)
+      console.error(res)
+      const token =<any> res
+      const user = values.username
+      store(token,user)
       auth.user = user
       auth.loggedIn = true
-      localStorage.setItem('sessionToken', token)
-      localStorage.setItem('prefix', values.prefix)
+      // localStorage.setItem('sessionToken', token)
+      // localStorage.setItem('prefix', values.prefix)
       router.push((route.query as any).next || '/admin')
     }
   }

@@ -23,8 +23,8 @@ export const useAuthStore = defineStore({
     logout() {
       const { clear } = useAuthStorage()
       clear()
-      localStorage.removeItem('sessionToken')
-      localStorage.removeItem('prefix')
+      // localStorage.removeItem('sessionToken')
+      // localStorage.removeItem('prefix')
       this.loggedIn = false
       this.user = null
     },
